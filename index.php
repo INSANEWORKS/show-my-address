@@ -15,7 +15,7 @@ if ($is_cli) {
 $show_host = ($host !== $ip);
 $hashSource = $show_host ? $host : $ip;
 
-// ユニークなグラデーションカラーを HSL で生成
+// グラデーション色を生成
 function hslColorFromString($str, $offset = 0) {
     $hash = crc32($str . $offset);
     $hue = $hash % 360;
@@ -50,10 +50,18 @@ $gradEnd = hslColorFromString($hashSource, 1);
 
     .info {
       text-align: center;
-      line-height: 1.2;
+      line-height: 1.4;
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 1em;
+    }
+
+    .fit-wrapper {
+      width: 90vw;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
     }
 
     .gradient-text {
@@ -64,14 +72,10 @@ $gradEnd = hslColorFromString($hashSource, 1);
       -webkit-text-fill-color: transparent;
       background-clip: text;
       text-fill-color: transparent;
-      cursor: pointer;
+      white-space: nowrap;
       display: inline-block;
-    }
-
-    @keyframes moveGradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      transform-origin: center;
+      cursor: pointer;
     }
 
     .host-style {
@@ -80,7 +84,12 @@ $gradEnd = hslColorFromString($hashSource, 1);
 
     .ip-style {
       font-size: 2em;
-      margin-top: 0.5em;
+    }
+
+    @keyframes moveGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .progress-bar {
@@ -90,34 +99,26 @@ $gradEnd = hslColorFromString($hashSource, 1);
     }
 
     #progress-bar-top {
-      top: 0;
-      left: 0;
-      width: 0%;
-      height: 4px;
+      top: 0; left: 0;
+      width: 0%; height: 4px;
       background: linear-gradient(to right, var(--grad-start), var(--grad-end));
     }
 
     #progress-bar-bottom {
-      bottom: 0;
-      right: 0;
-      width: 0%;
-      height: 4px;
+      bottom: 0; right: 0;
+      width: 0%; height: 4px;
       background: linear-gradient(to left, var(--grad-start), var(--grad-end));
     }
 
     #progress-bar-left {
-      bottom: 0;
-      left: 0;
-      width: 4px;
-      height: 0%;
+      bottom: 0; left: 0;
+      width: 4px; height: 0%;
       background: linear-gradient(to top, var(--grad-start), var(--grad-end));
     }
 
     #progress-bar-right {
-      top: 0;
-      right: 0;
-      width: 4px;
-      height: 0%;
+      top: 0; right: 0;
+      width: 4px; height: 0%;
       background: linear-gradient(to bottom, var(--grad-start), var(--grad-end));
     }
 
@@ -129,7 +130,7 @@ $gradEnd = hslColorFromString($hashSource, 1);
 </head>
 <body>
 
-  <!-- 四辺バー -->
+  <!-- 読み込みバー -->
   <div id="progress-bar-top" class="progress-bar"></div>
   <div id="progress-bar-bottom" class="progress-bar"></div>
   <div id="progress-bar-left" class="progress-bar"></div>
@@ -137,15 +138,21 @@ $gradEnd = hslColorFromString($hashSource, 1);
 
   <div class="info">
     <?php if ($show_host): ?>
-      <div class="host-style gradient-text" onclick="copyWithFeedback(this, '<?= htmlspecialchars($host) ?>')">
-        <?= htmlspecialchars($host) ?>
+      <div class="fit-wrapper">
+        <div id="host" class="gradient-text host-style" onclick="copyWithFeedback(this, '<?= htmlspecialchars($host) ?>')">
+          <?= htmlspecialchars($host) ?>
+        </div>
       </div>
-      <div class="ip-style gradient-text" onclick="copyWithFeedback(this, '<?= htmlspecialchars($ip) ?>')">
-        <?= htmlspecialchars($ip) ?>
+      <div class="fit-wrapper">
+        <div id="ip" class="gradient-text ip-style" onclick="copyWithFeedback(this, '<?= htmlspecialchars($ip) ?>')">
+          <?= htmlspecialchars($ip) ?>
+        </div>
       </div>
     <?php else: ?>
-      <div class="host-style gradient-text" onclick="copyWithFeedback(this, '<?= htmlspecialchars($ip) ?>')">
-        <?= htmlspecialchars($ip) ?>
+      <div class="fit-wrapper">
+        <div id="host" class="gradient-text host-style" onclick="copyWithFeedback(this, '<?= htmlspecialchars($ip) ?>')">
+          <?= htmlspecialchars($ip) ?>
+        </div>
       </div>
     <?php endif; ?>
   </div>
@@ -159,6 +166,12 @@ $gradEnd = hslColorFromString($hashSource, 1);
           el.innerText = original;
         }, 1000);
       });
+    }
+
+    function scaleToFit(el) {
+      const parent = el.parentElement;
+      const scale = parent.offsetWidth / el.scrollWidth;
+      el.style.transform = `scale(${Math.min(scale, 1)})`;
     }
 
     const topBar = document.getElementById('progress-bar-top');
@@ -197,6 +210,12 @@ $gradEnd = hslColorFromString($hashSource, 1);
         leftBar.remove();
         rightBar.remove();
       }, 800);
+
+      // 自動縮小（最大サイズ維持）実行
+      const hostEl = document.getElementById('host');
+      const ipEl = document.getElementById('ip');
+      if (hostEl) scaleToFit(hostEl);
+      if (ipEl) scaleToFit(ipEl);
     });
   </script>
 </body>
