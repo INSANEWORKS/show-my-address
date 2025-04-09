@@ -17,7 +17,23 @@ $hashSource = $show_host ? $host : $ip;
 
 // グラデーション色を生成
 function hslColorFromString($str, $offset = 0) {
-    $hash = crc32($str . $offset);
+    // IPv6形式ならネットワークプレフィクスを重視
+    if (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        // 簡易的にコロン区切りの上位3～4ブロックだけ使う
+        $blocks = explode(':', $str);
+        $prefix = implode(':', array_slice($blocks, 0, 4));
+    }
+    // IPv4なら先頭2オクテットを重視
+    elseif (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        $octets = explode('.', $str);
+        $prefix = $octets[0] . '.' . $octets[1];
+    }
+    // ホスト名の場合はそのまま先頭から12文字
+    else {
+        $prefix = substr($str, 0, 12);
+    }
+
+    $hash = crc32($prefix . $offset);
     $hue = $hash % 360;
     return "hsl($hue, 100%, 60%)";
 }
