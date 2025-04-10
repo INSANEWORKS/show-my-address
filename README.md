@@ -17,6 +17,7 @@ A minimalistic web page that displays the visitor's IP address (and hostname if 
 - ⚡ Loading animation bars on all four screen edges
 - 📱 Mobile responsive design (no line breaking, no overflow)
 - 🖥 CLI support: `curl` or `wget` returns plain IP only
+- ⌨️ Keyboard Shortcuts (see below)
 
 ---
 
@@ -65,6 +66,22 @@ No config needed. But you can customize:
 
 ---
 
+## ⌨️ Keyboard Shortcuts
+
+| Key       | Action                                |
+|-----------|----------------------------------------|
+| `w`       | Open [iplocation.io whois](https://iplocation.io/ping/your.ip) |
+| `p`       | Open [iplocation.io ping](https://iplocation.io/ping/your.ip) |
+| `l`       | Open [networksdb.io](https://networksdb.io/ip/your.ip) for WHOIS |
+| `s`       | Open [Cloudflare Speed Test](https://speed.cloudflare.com/) |
+| `t`       | Open [Test IPv6](https://test-ipv6.com/) |
+| `r`       | Reload the current page                |
+| `?` / `h` | Toggle the help overlay                |
+
+The help overlay includes these shortcuts and can be toggled using `?` or `h`.
+
+---
+
 ## 📦 File Structure
 
 ```
@@ -98,5 +115,3 @@ No config needed. But you can customize:
 MIT License © [Your Name]
 
 Feel free to use, modify, and deploy 🚀
-
----
