@@ -17,24 +17,25 @@ $hashSource = $show_host ? $host : $ip;
 
 // グラデーション色を生成
 function hslColorFromString($str, $offset = 0) {
-    // IPv6形式ならネットワークプレフィクスを重視
     if (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-        // 簡易的にコロン区切りの上位3～4ブロックだけ使う
+        // IPv6: 上位4ブロック = /64
         $blocks = explode(':', $str);
+        $blocks = array_pad($blocks, 8, '0000'); // :: 対応で省略補完
         $prefix = implode(':', array_slice($blocks, 0, 4));
-    }
-    // IPv4なら先頭2オクテットを重視
-    elseif (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+    } elseif (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        // IPv4: 上位3オクテット = /24
         $octets = explode('.', $str);
-        $prefix = $octets[0] . '.' . $octets[1];
-    }
-    // ホスト名の場合はそのまま先頭から12文字
-    else {
+        $prefix = implode('.', array_slice($octets, 0, 3));
+    } else {
+        // ホスト名など: 先頭12文字をベースに
         $prefix = substr($str, 0, 12);
     }
 
-    $hash = crc32($prefix . $offset);
-    $hue = $hash % 360;
+    // より分散性の高い sha1 ハッシュで hue 決定
+    $hash = sha1($prefix . $offset);
+    $dec = hexdec(substr($hash, 0, 6));
+    $hue = $dec % 360;
+
     return "hsl($hue, 100%, 60%)";
 }
 
@@ -83,7 +84,7 @@ $gradEnd = hslColorFromString($hashSource, 1);
     .gradient-text {
       background: linear-gradient(270deg, var(--grad-start), var(--grad-end), var(--grad-start));
       background-size: 600% 600%;
-      animation: moveGradient 6s ease infinite;
+      animation: moveGradient 30s ease infinite;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
