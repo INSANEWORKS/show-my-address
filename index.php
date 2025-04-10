@@ -13,34 +13,32 @@ if ($is_cli) {
 }
 
 $show_host = ($host !== $ip);
-$hashSource = $show_host ? $host : $ip;
 
-// グラデーション色を生成
-function hslColorFromString($str, $offset = 0) {
+// グラデーションのためのハッシュ元は常に IP アドレスのみ
+function extractPrefix($str) {
     if (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-        // IPv6: 上位4ブロック = /64
         $blocks = explode(':', $str);
-        $blocks = array_pad($blocks, 8, '0000'); // :: 対応で省略補完
-        $prefix = implode(':', array_slice($blocks, 0, 4));
+        $blocks = array_pad($blocks, 8, '0000');
+        return implode(':', array_slice($blocks, 0, 4));
     } elseif (filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-        // IPv4: 上位3オクテット = /24
         $octets = explode('.', $str);
-        $prefix = implode('.', array_slice($octets, 0, 3));
-    } else {
-        // ホスト名など: 先頭12文字をベースに
-        $prefix = substr($str, 0, 12);
+        return implode('.', array_slice($octets, 0, 3));
     }
-
-    // より分散性の高い sha1 ハッシュで hue 決定
-    $hash = sha1($prefix . $offset);
-    $dec = hexdec(substr($hash, 0, 6));
-    $hue = $dec % 360;
-
-    return "hsl($hue, 100%, 60%)";
 }
 
-$gradStart = hslColorFromString($hashSource, 0);
-$gradEnd = hslColorFromString($hashSource, 1);
+function hueFromString($str, $offset = 0) {
+    $prefix = extractPrefix($str);
+    $hash = sha1($prefix . $offset);
+    return hexdec(substr($hash, 0, 6)) % 360;
+}
+
+$hue1 = hueFromString($ip, 0);
+$hue2 = ($hue1 + 60) % 360;
+$hueMid = round(($hue1 + $hue2) / 2);
+
+$gradStart = "hsl($hue1, 100%, 60%)";
+$gradMid   = "hsl($hueMid, 100%, 60%)";
+$gradEnd   = "hsl($hue2, 100%, 60%)";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,6 +48,7 @@ $gradEnd = hslColorFromString($hashSource, 1);
   <style>
     :root {
       --grad-start: <?= $gradStart ?>;
+      --grad-mid: <?= $gradMid ?>;
       --grad-end: <?= $gradEnd ?>;
     }
 
@@ -82,9 +81,16 @@ $gradEnd = hslColorFromString($hashSource, 1);
     }
 
     .gradient-text {
-      background: linear-gradient(270deg, var(--grad-start), var(--grad-end), var(--grad-start));
-      background-size: 600% 600%;
-      animation: moveGradient 30s ease infinite;
+      background: linear-gradient(
+        270deg,
+        var(--grad-start),
+        var(--grad-mid),
+        var(--grad-end),
+        var(--grad-mid),
+        var(--grad-start)
+      );
+      background-size: 800% 800%;
+      animation: moveGradient 20s linear infinite;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -146,8 +152,6 @@ $gradEnd = hslColorFromString($hashSource, 1);
   </style>
 </head>
 <body>
-
-  <!-- 読み込みバー -->
   <div id="progress-bar-top" class="progress-bar"></div>
   <div id="progress-bar-bottom" class="progress-bar"></div>
   <div id="progress-bar-left" class="progress-bar"></div>
@@ -191,46 +195,33 @@ $gradEnd = hslColorFromString($hashSource, 1);
       el.style.transform = `scale(${Math.min(scale, 1)})`;
     }
 
-    const topBar = document.getElementById('progress-bar-top');
-    const bottomBar = document.getElementById('progress-bar-bottom');
-    const leftBar = document.getElementById('progress-bar-left');
-    const rightBar = document.getElementById('progress-bar-right');
+    const bars = ["top", "bottom", "left", "right"].map(pos =>
+      document.getElementById("progress-bar-" + pos)
+    );
 
     let progress = 0;
     const interval = setInterval(() => {
       progress += Math.random() * 10;
       if (progress < 90) {
-        topBar.style.width = progress + '%';
-        bottomBar.style.width = progress + '%';
-        leftBar.style.height = progress + '%';
-        rightBar.style.height = progress + '%';
+        bars[0].style.width = progress + '%';
+        bars[1].style.width = progress + '%';
+        bars[2].style.height = progress + '%';
+        bars[3].style.height = progress + '%';
       }
     }, 100);
 
-    window.addEventListener('load', () => {
+    window.addEventListener("load", () => {
       clearInterval(interval);
-      topBar.style.width = '100%';
-      bottomBar.style.width = '100%';
-      leftBar.style.height = '100%';
-      rightBar.style.height = '100%';
+      bars[0].style.width = "100%";
+      bars[1].style.width = "100%";
+      bars[2].style.height = "100%";
+      bars[3].style.height = "100%";
 
-      setTimeout(() => {
-        topBar.style.opacity = '0';
-        bottomBar.style.opacity = '0';
-        leftBar.style.opacity = '0';
-        rightBar.style.opacity = '0';
-      }, 300);
+      setTimeout(() => bars.forEach(b => b.style.opacity = "0"), 300);
+      setTimeout(() => bars.forEach(b => b.remove()), 800);
 
-      setTimeout(() => {
-        topBar.remove();
-        bottomBar.remove();
-        leftBar.remove();
-        rightBar.remove();
-      }, 800);
-
-      // 自動縮小（最大サイズ維持）実行
-      const hostEl = document.getElementById('host');
-      const ipEl = document.getElementById('ip');
+      const hostEl = document.getElementById("host");
+      const ipEl = document.getElementById("ip");
       if (hostEl) scaleToFit(hostEl);
       if (ipEl) scaleToFit(ipEl);
     });
