@@ -214,6 +214,7 @@ kbd {
       <li><kbd>l</kbd> - networksdb.io location</li>
       <li><kbd>s</kbd> - Cloudflare Speed Test</li>
       <li><kbd>b</kbd> - MX Toolbox Blacklist Test</li>
+      <li><kbd>j</kbd> - JavaScript Browser Information</li>
       <li><kbd>t</kbd> - Test IPv6</li>
       <li><kbd>r</kbd> - Reload</li>
       <li><kbd>?</kbd> or <kbd>h</kbd> - Toggle Help</li>
@@ -279,6 +280,8 @@ document.addEventListener("keydown", function(e) {
     window.open("https://speed.cloudflare.com/", "_blank");
   } else if (key === "b") {
     window.open(`https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a${ipValue}&run=toolpage`, "_blank");
+  } else if (key === "j") {
+    window.open("https://browserleaks.com/javascript", "_blank");
   } else if (key === "t") {
     window.open("https://test-ipv6.com/", "_blank");
   } else if (key === "r") {

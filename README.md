@@ -75,6 +75,7 @@ No config needed. But you can customize:
 | `l`       | Open [networksdb.io](https://networksdb.io/ip/your.ip) for WHOIS |
 | `s`       | Open [Cloudflare Speed Test](https://speed.cloudflare.com/) |
 | `b`       | Open [MX Toolbox Blacklist Test](https://mxtoolbox.com/) |
+| `j`       | Open [JavaScript Browser Information](https://browserleaks.com/javascript) |
 | `t`       | Open [Test IPv6](https://test-ipv6.com/) |
 | `r`       | Reload the current page                |
 | `?` / `h` | Toggle the help overlay                |
