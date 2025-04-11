@@ -74,7 +74,7 @@ No config needed. But you can customize:
 | `p`       | Open [iplocation.io ping](https://iplocation.io/ping/your.ip) |
 | `l`       | Open [networksdb.io](https://networksdb.io/ip/your.ip) for WHOIS |
 | `s`       | Open [Cloudflare Speed Test](https://speed.cloudflare.com/) |
-| `t`       | Open [MX Toolbox Blacklist Test](https://mxtoolbox.com/) |
+| `b`       | Open [MX Toolbox Blacklist Test](https://mxtoolbox.com/) |
 | `t`       | Open [Test IPv6](https://test-ipv6.com/) |
 | `r`       | Reload the current page                |
 | `?` / `h` | Toggle the help overlay                |
@@ -113,6 +113,6 @@ The help overlay includes these shortcuts and can be toggled using `?` or `h`.
 
 ## 📜 License
 
-MIT License © [Your Name]
+MIT License © INSANEWORKS,LLC
 
 Feel free to use, modify, and deploy 🚀
